@@ -21,7 +21,7 @@ from collections import namedtuple
 # In[4]:
 
 class Predicate(namedtuple('Predicate',
-                ['name'])):
+                ['name', 'arg_names'])):
     def __call__(self, *args):
         return GroundedPredicate(self, args)
     def condition(self, *args):
@@ -29,13 +29,13 @@ class Predicate(namedtuple('Predicate',
     def effect(self, *args):
         return ((self.name,)+tuple(args),)
     def neg(self):
-        return NegativePredicate(self.name)
+        return NegativePredicate(self.name, self.arg_names)
 
 
 # In[5]:
 
 class NegativePredicate(namedtuple('NegativePredicate',
-                                   ['name'])):
+                                   ['name', 'arg_names'])):
     def __call__(self, *args):
         return GroundedPredicate(self, args)
     def condition(self, *args):
@@ -43,13 +43,13 @@ class NegativePredicate(namedtuple('NegativePredicate',
     def effect(self, *args):
         return (pyddl.neg(self.neg().effect(*args)[0]),)
     def neg(self):
-        return Predicate(self.name)
+        return Predicate(self.name, self.arg_names)
 
 
 # In[6]:
 
 class DualPredicate(namedtuple('DualPredicate',
-                               ['name', 'negative_name'])):
+                               ['name', 'negative_name', 'arg_names'])):
     def __call__(self, *args):
         return GroundedPredicate(self, args)
     def condition(self, *args):
@@ -57,7 +57,7 @@ class DualPredicate(namedtuple('DualPredicate',
     def effect(self, *args):
         return (self.condition(*args)[0], pyddl.neg(self.neg().condition(*args)[0]))
     def neg(self):
-        return DualPredicate(self.negative_name, self.name)
+        return DualPredicate(self.negative_name, self.name, self.arg_names)
 
 
 # In[7]:
@@ -70,12 +70,12 @@ class GroundedPredicate(namedtuple('GroundedPredicate',
         return self.predicate.effect(*self.parameters)
     def neg(self):
         return GroundedPredicate(self.predicate.neg(), self.parameters)
-    def translate(self, *arg_names):
-        # brain_in('1','2').translate('brain_id', 'body_id)
+    def translate(self):
+        # Predicate('brain_in','brain_id','body_id')('1','2').translate()
         # '#[brain_id:1][body_id:2]brain_in#'
         return '#{0}{1}#'.format(''.join(['[{0}:#{1}#]'.format(name,value)
                                           for (name, value) in
-                                          zip(arg_names, self.parameters)]),
+                                          zip(self.predicate.arg_names, self.parameters)]),
                                  self.predicate.name)
 
 
