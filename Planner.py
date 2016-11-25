@@ -70,6 +70,13 @@ class GroundedPredicate(namedtuple('GroundedPredicate',
         return self.predicate.effect(*self.parameters)
     def neg(self):
         return GroundedPredicate(self.predicate.neg(), self.parameters)
+    def translate(self, *arg_names):
+        # brain_in('1','2').translate('brain_id', 'body_id)
+        # '#[brain_id:1][body_id:2]brain_in#'
+        return '#{0}{1}#'.format(''.join(['[{0}:#{1}#]'.format(name,value)
+                                          for (name, value) in
+                                          zip(arg_names, self.parameters)]),
+                                 self.predicate.name)
 
 
 # In[8]:
