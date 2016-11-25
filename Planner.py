@@ -77,6 +77,13 @@ class GroundedPredicate(namedtuple('GroundedPredicate',
                                           for (name, value) in
                                           zip(self.predicate.arg_names, self.parameters)]),
                                  self.predicate.name)
+    def flatten(self, grammar, fmt='#{0}.capitalize#.', temp_rule='__x__'):
+        x = self.translate()
+        grammar.push_rules(temp_rule,x)
+        nonterminal = fmt.format(temp_rule)
+        r = grammar.flatten(nonterminal)
+        grammar.pop_rules(temp_rule)
+        return r
 
 
 # In[8]:
@@ -98,7 +105,7 @@ def _predicate(self):
 pyddl.Action.predicate = _predicate
 
 
-# In[9]:
+# In[10]:
 
 def Problem(domain, objects, init=(), goal=()):
     return pyddl.Problem(domain=domain,
