@@ -92,6 +92,14 @@ def Action(name, parameters=(), preconditions=(), effects=(),
 
 # In[9]:
 
+def _predicate(self):
+    return Predicate(name=self.name,
+                     arg_names=self.arg_names)
+pyddl.Action.predicate = _predicate
+
+
+# In[9]:
+
 def Problem(domain, objects, init=(), goal=()):
     return pyddl.Problem(domain=domain,
                          objects=objects,
