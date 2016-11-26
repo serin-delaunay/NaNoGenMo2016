@@ -33,10 +33,15 @@ from tracery import Grammar, modifiers
 
 # In[7]:
 
-predicates = {}
+import tracery_alterations
 
 
 # In[8]:
+
+predicates = {}
+
+
+# In[9]:
 
 skull_open = DualPredicate('open', 'closed', ('body_id',))
 predicates['open'] = skull_open
@@ -49,7 +54,7 @@ brain_in = Predicate('brain_in', ('brain_id','body_id'))
 predicates['brain_in'] = brain_in
 
 
-# In[9]:
+# In[10]:
 
 open_skull = Action(
     name='open_skull',
@@ -59,7 +64,7 @@ open_skull = Action(
 predicates['open_skull'] = open_skull.predicate()
 
 
-# In[10]:
+# In[11]:
 
 close_skull = Action(
     name='close_skull',
@@ -69,7 +74,7 @@ close_skull = Action(
 predicates['close_skull'] = close_skull.predicate()
 
 
-# In[11]:
+# In[12]:
 
 remove_brain = Action(
     name='remove_brain',
@@ -85,7 +90,7 @@ remove_brain = Action(
 predicates['remove_brain'] = remove_brain.predicate()
 
 
-# In[12]:
+# In[13]:
 
 replace_brain = Action(
     name='replace_brain',
@@ -101,7 +106,7 @@ replace_brain = Action(
 predicates['replace_brain'] = replace_brain.predicate()
 
 
-# In[13]:
+# In[14]:
 
 brain_surgery = pyddl.Domain(actions=(open_skull,
                                       close_skull,
@@ -109,7 +114,7 @@ brain_surgery = pyddl.Domain(actions=(open_skull,
                                       replace_brain))
 
 
-# In[14]:
+# In[15]:
 
 init_state = [brain_in('2','2'),
               brain_in('1','1'),
@@ -124,7 +129,7 @@ objects={'brain': subject_ids,
          'body': subject_ids}
 
 
-# In[15]:
+# In[16]:
 
 two_brain_swap = Problem(domain=brain_surgery,
                          objects=objects,
@@ -132,7 +137,7 @@ two_brain_swap = Problem(domain=brain_surgery,
                          goal=goal_state)
 
 
-# In[16]:
+# In[17]:
 
 def brain_surgery_heuristic(state):
     r = 0.0
@@ -146,23 +151,16 @@ def brain_surgery_heuristic(state):
     return r
 
 
-# In[17]:
+# In[18]:
 
 #tbs_plan = pyddl.planner(two_brain_swap, heuristic=brain_surgery_heuristic)
 tbs_plan = pyddl.planner(two_brain_swap)
 
 
-# In[18]:
+# In[19]:
 
 for action in tbs_plan:
     print(action)
-
-
-# In[19]:
-
-def possessive(text, *params):
-    return text+"'s"
-modifiers.base_english['possessive'] = possessive
 
 
 # In[20]:
