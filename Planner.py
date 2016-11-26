@@ -62,6 +62,19 @@ class DualPredicate(namedtuple('DualPredicate',
 
 # In[7]:
 
+class PredicateDict:
+    def __init__(self):
+        self._predicates = {}
+    def add(self, predicate):
+        self._predicates[predicate.name] = predicate
+        if isinstance(predicate,DualPredicate):
+            self._predicates[predicate.neg().name] = predicate.neg()
+    def __getitem__(self, key):
+        return self._predicates[value]
+
+
+# In[8]:
+
 class GroundedPredicate(namedtuple('GroundedPredicate',
                                  ['predicate', 'parameters'])):
     def condition(self):
@@ -86,7 +99,7 @@ class GroundedPredicate(namedtuple('GroundedPredicate',
         return r
 
 
-# In[8]:
+# In[9]:
 
 def Action(name, parameters=(), preconditions=(), effects=(),
            unique=False, no_permute=False):
@@ -97,7 +110,7 @@ def Action(name, parameters=(), preconditions=(), effects=(),
                         unique=unique, no_permute=no_permute)
 
 
-# In[9]:
+# In[10]:
 
 def _predicate(self):
     return Predicate(name=self.name,
@@ -105,7 +118,7 @@ def _predicate(self):
 pyddl.Action.predicate = _predicate
 
 
-# In[10]:
+# In[11]:
 
 def Problem(domain, objects, init=(), goal=()):
     return pyddl.Problem(domain=domain,
