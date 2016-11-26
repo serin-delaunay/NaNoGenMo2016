@@ -376,21 +376,3 @@ questions = [
              ('astronomy','geek')),
 ]
 
-
-# In[9]:
-
-questions[-1].instantiate(2)
-
-
-# In[10]:
-
-for q,(a1,a2) in sorted(question_set(questions, 15)):
-    print(q)
-    print('  '+a1)
-    print('  '+a2)
-
-
-# In[11]:
-
-[qg.flatten('#title_full_name# (#pronouns#)') for i in range(20)]
-
