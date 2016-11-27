@@ -317,7 +317,8 @@ obvious_translations = {
 
 def generate_entry(questionnaire):
     name = qg.flatten('#title_full_name#')
-    splitname = re.split('[ -]',unidecode.unidecode(name.lower()))
+    name_simplified = unidecode.unidecode(name.lower()).replace('.','')
+    splitname = re.split('[ -]',name_simplified)
     initials = ''.join(w[0] for w in splitname)
     id_words = [initials]+splitname
     g.push_rules('id_word',id_words)
@@ -463,11 +464,11 @@ fg = Grammar({
                     'Mahler','Schubert','Schumann',
                     'Backer-Grøndahl'],
         'baroque_composer':['Bach','Handel','Vivaldi','Royer'],
-        'composition':['#composer# #composition_type',
-                       '#composer# #composition_type',
+        'composition':['#composer# #composition_type#',
+                       '#composer# #composition_type#',
                        '#baroque_composer# #baroque_composition_type#',
-                       '#composer# #composition_type',
-                       '#composer# #composition_type',
+                       '#composer# #composition_type#',
+                       '#composer# #composition_type#',
                        '#baroque_composer# #baroque_composition_type#',
                        '#[a:#baroque_composition_type][b:composition_type]ab#'],
         'discovery':['new planet','new element',
