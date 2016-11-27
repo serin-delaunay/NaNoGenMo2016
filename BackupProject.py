@@ -10,6 +10,7 @@ from Questions import question_set, questions, qg
 import pycorpora
 import uuid
 import re
+import unidecode
 
 
 # In[2]:
@@ -316,7 +317,7 @@ obvious_translations = {
 
 def generate_entry(questionnaire):
     name = qg.flatten('#title_full_name#')
-    splitname = re.split('[ -]',name.lower())
+    splitname = re.split('[ -]',unidecode.unidecode(name.lower()))
     initials = ''.join(w[0] for w in splitname)
     id_words = [initials]+splitname
     g.push_rules('id_word',id_words)
