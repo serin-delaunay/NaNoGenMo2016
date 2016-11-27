@@ -42,7 +42,7 @@ def question_set(questions, max_qs=10, answers=2, exclude=[]):
 
 # In[4]:
 
-saint_titles = ['Saint', 'Pope', 'King', 'Mother']
+saint_titles = ['Saint ', 'Pope ', 'King ', 'Mother ']
 
 
 # In[5]:
