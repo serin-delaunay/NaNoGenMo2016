@@ -11,9 +11,15 @@ import pycorpora
 import uuid
 import re
 import unidecode
+import inflect
 
 
 # In[2]:
+
+p = inflect.engine()
+
+
+# In[3]:
 
 def add_entry(entry, length_target=50000):
     global entries
@@ -26,7 +32,7 @@ def add_entry(entry, length_target=50000):
     return True
 
 
-# In[3]:
+# In[4]:
 
 g = Grammar({
         'address':'#nickname#@#domain#',
@@ -262,7 +268,7 @@ g = Grammar({
 g.add_modifiers({'reverse':lambda text, *params: text[::-1]})
 
 
-# In[4]:
+# In[5]:
 
 possible_translations = {
     "A":["@","4","^","/\\","/-\\","aye"],
@@ -313,11 +319,13 @@ obvious_translations = {
 }
 
 
-# In[5]:
+# In[6]:
 
 def generate_entry(questionnaire):
     name = qg.flatten('#title_full_name#')
-    name_simplified = unidecode.unidecode(name.lower()).replace('.','')
+    name_simplified = unidecode.unidecode(name.lower())
+    name_simplified = name_simplified.replace('.','')
+    name_simplified = name_simplified.replace("'",'')
     splitname = re.split('[ -]',name_simplified)
     initials = ''.join(w[0] for w in splitname)
     id_words = [initials]+splitname
@@ -344,7 +352,7 @@ password: "{4}".
     return data
 
 
-# In[6]:
+# In[7]:
 
 fg = Grammar({
         'attribute_verb':['are','have always been','were once',
@@ -391,14 +399,13 @@ fg = Grammar({
         'sense_verb':['see','hear','smell','touch','taste','sense','become aware of'],
         'conditional_verb_phrase':['#sense_verb# #omen#'],
         'omen':['#omen_noun##[x: on #day_descriptor.a#]maybe_x#',],
-                #'#omen_noun# #omen_verbing##[x: on #day_descriptor.a#]maybe_x#'],
-        #'omen_verbing':['']
         'omen_noun':['the #omen_animal##[x: #omen_animal_verb#]maybe_x#',
                      '#omen_animal.a##[x: #omen_animal_verb#]maybe_x#',
                      '#omen_abstract#',
                      '#omen_sky.a#'],
         'omen_abstract':['danger','love in the air',
-                         'new opportunities','#their# dreams #[a:coming true][b:slipping away]ab#',
+                         'new opportunities',
+                         '#their# dreams #[a:coming true][b:slipping away]ab#',
                          ],
         'omen_animal':['#omen_animal_aux#','#omen_animal_aux#','#omen_animal_aux#',
                        '#month# #omen_animal_aux#','#omen_animal_aux# of #attribute_adjective#ness'],
@@ -443,17 +450,6 @@ fg = Grammar({
                               '#conditional_when.capitalize#, #anytime_advice#.',
                               '#conditional_when.capitalize#, #conditional_if# then #anytime_advice#.',
                               '#conditional_when.capitalize#, #anytime_advice#, #conditional_if#.'],
-        'prediction_aux_verb':['will','might','may'],
-        'prediction_adverb_1':['possibly','probably','likely','most likely',],
-        'prediction_adverb_2':['never','not',
-                               'one day','finally','in time',],
-        'prediction_core':'#they# #prediction_aux_verb##[x: #prediction_adverb_1#]maybe_x##[x: #prediction_adverb_2#]maybe_x# #prediction_verb_phrase#',
-        'prediction':['#prediction_core.capitalize#.',
-                      '#prediction_core.capitalize#.',
-                      '#prediction_core.capitalize#.',
-                      '#conditional_if.capitalize#, #prediction_core#.',
-                      '#prediction_core.capitalize#, #conditional_if#.',
-                      '#conditional_when.capitalize#, #prediction_core#.'],
         'realise_dreams_verb':['realise','achieve','reach'],
         'artist':['Picasso','van Gogh','Monet','Mondrian','Rembrandt',
                   'Caravaggio','Klimt','Michelangelo','Vermeer','Raphael',
@@ -489,16 +485,62 @@ fg = Grammar({
                          '#conditional_when#', '#die_verbing#',
                          'when you are at your #[a:best][b:worst]ab#',
                          'when you are at your #[a:most][b:least]ab# #attribute_adjective#'],
+        'approximately':['approximately','around','about'],
+        'children':'children',
+        'have_child_verb':['have','adopt','give birth to','parent'],
+        'prediction_aux_verb':['will','might','may'],
+        'prediction_adverb_1':['possibly','probably','likely','most likely',],
+        'prediction_adverb_2_positive':['one day','finally','in time',],
+        'prediction_adverb_2':['never','not',
+                               'one day','finally','in time'],
+        'prediction_core':'#they# #prediction_aux_verb#'
+                          '#[x: #prediction_adverb_1#]maybe_x#'
+                          '#[x: #prediction_adverb_2#]maybe_x#'
+                          ' #prediction_verb_phrase#',
+        'prediction':['#prediction_core.capitalize#.',
+                      '#prediction_core.capitalize#.',
+                      '#prediction_core.capitalize#.',
+                      '#conditional_if.capitalize#, #prediction_core#.',
+                      '#prediction_core.capitalize#, #conditional_if#.',
+                      '#conditional_when.capitalize#, #prediction_core#.'],
+        'children_prediction_common':['#core.capitalize#.',
+                                      '#core.capitalize#.',
+                                      '#core.capitalize#.',
+                                      '#conditional_if.capitalize#, #core#.',
+                                      '#core.capitalize#, #conditional_if#.'],
+        'no_children_prediction_core':'#they# #prediction_aux_verb#'
+                                      '#[x: #prediction_adverb_1#]maybe_x# '
+                                      '#no_children_prediction_verb_phrase#',
+        'one_child_prediction_core':'#they# #prediction_aux_verb#'
+                                    '#[x: #prediction_adverb_1#]maybe_x#'
+                                    '#[x: #prediction_adverb_2_positive#]maybe_x# '
+                                    '#one_child_prediction_verb_phrase#',
+        'children_prediction_core':'#they# #prediction_aux_verb#'
+                                    '#[x: #prediction_adverb_1#]maybe_x# '
+                                    '#children_prediction_verb_phrase#',
+        'no_children_prediction_verb_phrase':['#have_child_verb# no children',
+                                              'never #have_child_verb# children',
+                                              'not #have_child_verb# children'],
+        'one_child_prediction_verb_phrase':['#have_child_verb# a child',
+                                            '#[children_number:one][children:child]children_prediction_verb_phrase#'],
+        'children_prediction_verb_phrase':['#have_child_verb# #children_number# #children#',
+                                           '#have_child_verb# #children_number# #children#',
+                                           '#have_child_verb# #approximately# #children_number# #children#',
+                                           '#have_child_verb# at #[a:least][b:most]ab# #children_number# #children#'],
+        'no_children_prediction':'#[core:#no_children_prediction_core#]children_prediction_common#',
+        'one_child_prediction':'#[core:#one_child_prediction_core#]children_prediction_common#',
+        'children_prediction':'#[core:#children_prediction_core#]children_prediction_common#',
     })
 fg.add_modifiers(modifiers.base_english)
 
 
-# In[7]:
-
-fg.flatten('#[#set_pronouns_you#]prediction#')
-
-
 # In[8]:
+
+print(fg.flatten('#[#set_pronouns_you#][children_number:three][children:children]children_prediction#'))
+print(fg.flatten('#[#set_pronouns_you#]prediction#'))
+
+
+# In[9]:
 
 def answer_seed(answers, reset=False, count=[0]):
     if reset:
@@ -507,7 +549,7 @@ def answer_seed(answers, reset=False, count=[0]):
     count[0] += 1
 
 
-# In[9]:
+# In[10]:
 
 def tell_fortune(answers):
     answer_seed(answers, reset=True)
@@ -531,10 +573,37 @@ def tell_fortune(answers):
     for i in range(personal_prediction_count):
         answer_seed(answers)
         fortune.append(fg.flatten('#[#set_pronouns_you#]prediction#'))
+    
+    answer_seed(answers)
+    r = random.random()
+    if r > 0.9:
+        child_count = 0
+    if r > 0.55:
+        child_count = random.randint(0,1)
+    if r > 0.1:
+        child_count = random.randint(0,3)
+    elif r > 0.005:
+        child_count = random.randint(2,8)
+    else:
+        child_count = random.randint(4,20)
+    child_prediction_count = random.randint(0,child_count)
+    
+    answer_seed(answers)
+    if child_count == 0:
+        fortune.append(fg.flatten('#no_children_prediction#'))
+    elif child_count == 1:
+        fortune.append(fg.flatten('#one_child_prediction#'))
+    else:
+        fortune.append(fg.flatten(
+                '#[children_number:{0}][children:children]children_prediction#'.format(
+                    p.number_to_words(child_count))))
+#     for i in range(randint(0,child_count)):
+#         for f in child_fortune(answers):
+#             fortune.append(f)
     return ' '.join(fortune)
 
 
-# In[10]:
+# In[11]:
 
 entries = []
 wordcount = 0
