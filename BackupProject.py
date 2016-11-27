@@ -34,6 +34,40 @@ def add_entry(entry, length_target=50000):
 
 # In[4]:
 
+def generate_entry(questionnaire):
+    name = qg.flatten('#title_full_name#')
+    name_simplified = unidecode.unidecode(name.lower())
+    name_simplified = name_simplified.replace('.','')
+    name_simplified = name_simplified.replace("'",'')
+    splitname = re.split('[ -]',name_simplified)
+    initials = ''.join(w[0] for w in splitname)
+    id_words = [initials]+splitname
+    g.push_rules('id_word',id_words)
+    email = g.flatten('#address#')
+    password = g.flatten('#poor_password#')
+    username = g.flatten('#nickname#')
+    g.pop_rules('id_word')
+    password_rules = {
+        ord(k.lower()):random.choice(v[:random.randint(1,len(v))])
+        for (k,v) in random.sample(obvious_translations.items(),random.randint(3,10))
+    }
+    password = password.translate(password_rules)
+    answers = tuple(q[1]() for q in questionnaire)
+    data = """userid: {0}.
+username: "{1}".
+name: {2}.
+email: {3}.
+password: "{4}".
+""".format(uuid.uuid4(), username, name, email, password)
+    data = data + '\n'.join("{0}\n    {1}".format(q[0],a)
+                            for (q,a) in zip(questionnaire, answers))+'\n'
+    answer_seed(answers, reset=True)
+    data = data + "Fortune:\n{0}\n".format(tell_fortune(answers))
+    return data
+
+
+# In[5]:
+
 g = Grammar({
         'address':'#nickname#@#domain#',
         'nickname_base':['#nick_noun_rev#',
@@ -268,7 +302,7 @@ g = Grammar({
 g.add_modifiers({'reverse':lambda text, *params: text[::-1]})
 
 
-# In[5]:
+# In[6]:
 
 possible_translations = {
     "A":["@","4","^","/\\","/-\\","aye"],
@@ -319,49 +353,24 @@ obvious_translations = {
 }
 
 
-# In[6]:
-
-def generate_entry(questionnaire):
-    name = qg.flatten('#title_full_name#')
-    name_simplified = unidecode.unidecode(name.lower())
-    name_simplified = name_simplified.replace('.','')
-    name_simplified = name_simplified.replace("'",'')
-    splitname = re.split('[ -]',name_simplified)
-    initials = ''.join(w[0] for w in splitname)
-    id_words = [initials]+splitname
-    g.push_rules('id_word',id_words)
-    email = g.flatten('#address#')
-    password = g.flatten('#poor_password#')
-    username = g.flatten('#nickname#')
-    g.pop_rules('id_word')
-    password_rules = {
-        ord(k.lower()):random.choice(v[:random.randint(1,len(v))])
-        for (k,v) in random.sample(obvious_translations.items(),random.randint(3,10))
-    }
-    password = password.translate(password_rules)
-    answers = [q[1]() for q in questionnaire]
-    data = """userid: {0}.
-username: "{1}".
-name: {2}.
-email: {3}.
-password: "{4}".
-""".format(uuid.uuid4(), username, name, email, password)
-    data = data + '\n'.join("{0}\n    {1}".format(q[0],a)
-                            for (q,a) in zip(questionnaire, answers))+'\n'
-    data = data + "Fortune:\n{0}\n".format(tell_fortune(tuple(answers)))
-    return data
-
-
 # In[7]:
 
 fg = Grammar({
         'attribute_verb':['are','have always been','were once',
                           'are not', 'have never been','were'],
-        'attribute_statement':['You are #[x:sometimes ]maybe_x##attribute.a# person.','You are not #[x:always ]maybe_x##attribute.a# person.',
-                               'You were once #attribute_more_less.a# person.','You were never #attribute_more_less.a# person.',
-                               'You have always been #attribute.a# person.','You have not always been #attribute.a# person.',
-                               'You will #[x:one day ]maybe_x#become #attribute_more_less.a# person#[x: again]maybe_x#.','You will #[a:never][b:not]ab# become #attribute.a# person#[x: again]maybe_x#.',
-                               'You will always be #attribute.a# person.','You will #[a:not always][b:sometimes]ab# be #attribute.a# person.'],
+        'present_attribute_statement':['#they.capitalize# are #[x:sometimes ]maybe_x##attribute.a# person.',
+                                       '#they.capitalize# are not #[x:always ]maybe_x##attribute.a# person.'],
+        'past_attribute_statement':['#they.capitalize# were once #attribute_more_less.a# person.',
+                                    '#they.capitalize# were never #attribute_more_less.a# person.',
+                                    '#they.capitalize# have always been #attribute.a# person.',
+                                    '#they.capitalize# have not always been #attribute.a# person.'],
+        'future_attribute_statement':['#they.capitalize# will #[x:one day ]maybe_x#become #attribute_more_less.a# person#[x: again]maybe_x#.',
+                                      '#they.capitalize# will #[a:never][b:not]ab# become #attribute.a# person#[x: again]maybe_x#.',
+                                      '#they.capitalize# will always be #attribute.a# person.',
+                                      '#they.capitalize# will #[a:not always][b:sometimes]ab# be #attribute.a# person.'],
+        'attribute_statement':['#past_attribute_statement#',
+                               '#present_attribute_statement#',
+                               '#future_attribute_statement#'],
         'attribute':['#attribute_quantifier# #attribute_adjective#',
                      '#attribute_quantifier# #attribute_adjective#',
                      '#attribute_adjective#'],
@@ -373,6 +382,7 @@ fg = Grammar({
         'attribute_quantifier_more_less':['more','less','#attribute_quantifier#'],
         'maybe_x':['#x#',''],
         'ab':['#a#','#b#'],
+        'subject':'#they#',
         'set_pronouns_you':'[they:you][them:you][their:your][theirs:yours][themself:yourself]',
         'set_pronouns_they':'[they:they][them:them][their:their][theirs:theirs][themself:themself]',
         'today_advice_head':['It is a good day to',
@@ -388,7 +398,8 @@ fg = Grammar({
             'take #[a:new][b:more]ab# opportunities',
             'fall in love#[x: #again#]maybe_x#', 'relish life#[x: #again#]maybe_x#',
             'start something new', 'break with the old#[x: #again#]maybe_x#',
-            'count #their# blessings', 'make a#[x: new]maybe_x# friend'],
+            'count #their# blessings', 'make a#[x: new]maybe_x# friend',
+            'rekindle an old #[a:relationship][b:friendship]ab#'],
         'verb_phrase':[
             '#platitude_verb_phrase#',
             'become #[x:#attribute_quantifier_more_less# ]maybe_x##attribute_adjective#'],
@@ -413,7 +424,7 @@ fg = Grammar({
                          '#[x:giant ]maybe_x#moth',
                          '#[x:vampire ]maybe_x#bat',
                          'unicorn','panther','ghost'],
-        'omen_animal_verb':['prowling','revealing itself','in your life','escaping','dozing'],
+        'omen_animal_verb':['prowling','revealing itself','in #their# life','escaping','dozing'],
         'omen_sky':['rainbow','eclipse','new star','comet','shooting star'],
         'day_descriptor':['#[x:#weather# ]maybe_x##[x:#month# ]maybe_x##day#',
                           '#[x:#weather# ]maybe_x##day##[x: of #month#]maybe_x#'],
@@ -480,13 +491,13 @@ fg = Grammar({
         'die_verbing':['singing','laughing','weeping','crying'],
         'die_condition':['alone', 'surrounded by friends',
                          'surrounded by family', 'surrounded by friends and family',
-                         'with only a stranger to comfort you',
-                         'in your sleep','in a #[a:fire][b:robbery]ab#',
+                         'with only a stranger to comfort #them#',
+                         'in #their# sleep','in a #[a:fire][b:robbery]ab#',
                          '#conditional_when#', '#die_verbing#',
-                         'when you are at your #[a:best][b:worst]ab#',
-                         'when you are at your #[a:most][b:least]ab# #attribute_adjective#'],
+                         'when #they# are at #their# #[a:best][b:worst]ab#',
+                         'when #they# are at #their# #[a:most][b:least]ab# #attribute_adjective#'],
         'approximately':['approximately','around','about'],
-        'children':'children',
+        'children':'#[x:#attribute_adjective# ]maybe_x#children',
         'have_child_verb':['have','adopt','give birth to','parent'],
         'prediction_aux_verb':['will','might','may'],
         'prediction_adverb_1':['possibly','probably','likely','most likely',],
@@ -536,12 +547,6 @@ fg.add_modifiers(modifiers.base_english)
 
 # In[8]:
 
-print(fg.flatten('#[#set_pronouns_you#][children_number:three][children:children]children_prediction#'))
-print(fg.flatten('#[#set_pronouns_you#]prediction#'))
-
-
-# In[9]:
-
 def answer_seed(answers, reset=False, count=[0]):
     if reset:
         count[0] = 0
@@ -549,61 +554,87 @@ def answer_seed(answers, reset=False, count=[0]):
     count[0] += 1
 
 
-# In[10]:
+# In[9]:
 
-def tell_fortune(answers):
-    answer_seed(answers, reset=True)
+def tell_fortune(answers, pronouns='set_pronouns_you',future_only=False,
+                 identifier_subject='you', identifier_possessive='your',
+                 max_child_fortunes=3):
     fortune = []
-    attribute_statement_count = random.randint(0,3)
+    answer_seed(answers)
+    if not future_only:
+        fortune.append(fg.flatten('#[#{0}#][they:{1}]attribute_statement#'.format(
+                    pronouns,identifier_subject)))
+    else:
+        fortune.append(fg.flatten('#[#{0}#][they:{1}]future_attribute_statement#'.format(
+                    pronouns,identifier_subject)))
+    attribute_statement_count = random.randint(0,2)
     for i in range(attribute_statement_count):
         answer_seed(answers)
-        fortune.append(fg.flatten('#attribute_statement#'))
-    
-    answer_seed(answers)
-    fortune.append(fg.flatten('#[#set_pronouns_you#]today_advice#'))
+        if not future_only:
+            fortune.append(fg.flatten('#[#{0}#]attribute_statement#'.format(pronouns)))
+        else:
+            fortune.append(fg.flatten('#[#{0}#]future_attribute_statement#'.format(pronouns)))
+    if not future_only:
+        answer_seed(answers)
+        fortune.append(fg.flatten('#[#{0}#]today_advice#'.format(pronouns)))
     
     answer_seed(answers)
     conditional_advice_count = random.randint(0,3)
     for i in range(conditional_advice_count):
         answer_seed(answers)
-        fortune.append(fg.flatten('#[#set_pronouns_you#]conditional_advice#'))
+        fortune.append(fg.flatten('#[#{0}#]conditional_advice#'.format(pronouns)))
     
     answer_seed(answers)
     personal_prediction_count = random.randint(0,3)
     for i in range(personal_prediction_count):
         answer_seed(answers)
-        fortune.append(fg.flatten('#[#set_pronouns_you#]prediction#'))
+        fortune.append(fg.flatten('#[#{0}#]prediction#'.format(pronouns)))
     
     answer_seed(answers)
     r = random.random()
-    if r > 0.9:
+    if r > 0.7:
         child_count = 0
-    if r > 0.55:
+    if r > 0.25:
         child_count = random.randint(0,1)
     if r > 0.1:
         child_count = random.randint(0,3)
-    elif r > 0.005:
+    elif r > 0.003:
         child_count = random.randint(2,8)
     else:
         child_count = random.randint(4,20)
     child_prediction_count = random.randint(0,child_count)
+    child_prediction_count = min(child_prediction_count,max_child_fortunes)
     
     answer_seed(answers)
     if child_count == 0:
-        fortune.append(fg.flatten('#no_children_prediction#'))
+        fortune.append(fg.flatten('#[#{0}#]no_children_prediction#'.format(pronouns)))
     elif child_count == 1:
-        fortune.append(fg.flatten('#one_child_prediction#'))
+        fortune.append(fg.flatten('#[#{0}#]one_child_prediction#'.format(pronouns)))
     else:
         fortune.append(fg.flatten(
-                '#[children_number:{0}][children:children]children_prediction#'.format(
+                '#[#{0}#][children_number:{1}][children:children]children_prediction#'.format(
+                    pronouns,
                     p.number_to_words(child_count))))
-#     for i in range(randint(0,child_count)):
-#         for f in child_fortune(answers):
-#             fortune.append(f)
-    return ' '.join(fortune)
+    fortunes = [' '.join(fortune)]
+    answer_seed(answers)
+    child_fortune_numbers = random.sample(list(range(child_count)),child_prediction_count)
+    for child_number in child_fortune_numbers:
+        fortunes.append(tell_fortune(
+                answers,
+                pronouns='set_pronouns_they',
+                future_only=True,
+                identifier_subject='{0} {1} child'.format(
+                    identifier_possessive,
+                    p.number_to_words(str(child_number+1)+'th')),
+                identifier_possessive='{0} {1} child\'s'.format(
+                    identifier_possessive,
+                    p.number_to_words(str(child_number+1)+'th')),
+                max_child_fortunes=max(0,max_child_fortunes-1)))
+    fortune_text = '\n'.join(fortunes)
+    return fortune_text
 
 
-# In[11]:
+# In[10]:
 
 entries = []
 wordcount = 0
