@@ -32,7 +32,7 @@ def add_entry(entry, length_target=50000):
     return True
 
 
-# In[4]:
+# In[ ]:
 
 def generate_entry(questionnaire):
     name = qg.flatten('#title_full_name#')
@@ -53,20 +53,20 @@ def generate_entry(questionnaire):
     }
     password = password.translate(password_rules)
     answers = tuple(q[1]() for q in questionnaire)
-    data = """userid: {0}.
-username: "{1}".
-name: {2}.
-email: {3}.
-password: "{4}".
+    data = """**userid**: `{0}`
+**username**: `{1}`
+**name**: {2}.
+**email**: `{3}`
+**password**: `{4}`
 """.format(uuid.uuid4(), username, name, email, password)
-    data = data + '\n'.join("{0}\n    {1}".format(q[0],a)
+    data = data + '\n'.join("**{0}**\n    {1}".format(q[0],a)
                             for (q,a) in zip(questionnaire, answers))+'\n'
     answer_seed(answers, reset=True)
-    data = data + "Fortune:\n{0}\n".format(tell_fortune(answers))
+    data = data + "**Fortune**:\n{0}\n".format(tell_fortune(answers))
     return data
 
 
-# In[5]:
+# In[ ]:
 
 g = Grammar({
         'address':'#nickname#@#domain#',
@@ -302,7 +302,7 @@ g = Grammar({
 g.add_modifiers({'reverse':lambda text, *params: text[::-1]})
 
 
-# In[6]:
+# In[ ]:
 
 possible_translations = {
     "A":["@","4","^","/\\","/-\\","aye"],
@@ -353,7 +353,7 @@ obvious_translations = {
 }
 
 
-# In[7]:
+# In[ ]:
 
 fg = Grammar({
         'attribute_verb':['are','have always been','were once',
@@ -545,7 +545,7 @@ fg = Grammar({
 fg.add_modifiers(modifiers.base_english)
 
 
-# In[8]:
+# In[ ]:
 
 def answer_seed(answers, reset=False, count=[0]):
     if reset:
@@ -554,7 +554,7 @@ def answer_seed(answers, reset=False, count=[0]):
     count[0] += 1
 
 
-# In[9]:
+# In[ ]:
 
 def tell_fortune(answers, pronouns='set_pronouns_you',future_only=False,
                  identifier_subject='you', identifier_possessive='your',
@@ -634,7 +634,7 @@ def tell_fortune(answers, pronouns='set_pronouns_you',future_only=False,
     return fortune_text
 
 
-# In[10]:
+# In[ ]:
 
 entries = []
 wordcount = 0
@@ -648,7 +648,7 @@ while add_entry(generate_entry(questionnaire),50000):
 print(wordcount)
 print(len(entries))
 story = '\n'.join(entries)
-f = open('data_leak.txt','w',encoding='utf-8')
+f = open('data_leak.md','w',encoding='utf-8')
 f.write(story)
 f.close()
 
