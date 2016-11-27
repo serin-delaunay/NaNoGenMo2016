@@ -338,32 +338,59 @@ password: "{4}".
     return data
 
 
-# In[6]:
+# In[54]:
 
 fg = Grammar({
         'attribute_verb':['are','have always been','were once',
                           'are not', 'have never been','were'],
         'attribute_statement':['You are #[x:sometimes ]maybe_x##attribute.a# person.','You are not #[x:always ]maybe_x##attribute.a# person.',
-                               'You were once #attribute.a# person.','You were never #attribute.a# person.',
+                               'You were once #attribute_more_less.a# person.','You were never #attribute_more_less.a# person.',
                                'You have always been #attribute.a# person.','You have not always been #attribute.a# person.',
-                               'You will #[x:one day ]maybe_x#become #attribute.a# person#[x: again]maybe_x#.','You will #[a:never][b:not]ab# become #attribute.a# person#[x: again]maybe_x#.',
+                               'You will #[x:one day ]maybe_x#become #attribute_more_less.a# person#[x: again]maybe_x#.','You will #[a:never][b:not]ab# become #attribute.a# person#[x: again]maybe_x#.',
                                'You will always be #attribute.a# person.','You will #[a:not always][b:sometimes]ab# be #attribute.a# person.'],
         'attribute':['#attribute_quantifier# #attribute_adjective#',
                      '#attribute_quantifier# #attribute_adjective#',
                      '#attribute_adjective#'],
+        'attribute_more_less':['#attribute_quantifier_more_less# #attribute_adjective#',
+                               '#attribute_quantifier_more_less# #attribute_adjective#',
+                               '#attribute_adjective#'],
         'attribute_adjective':pycorpora.humans.descriptions['descriptions'],
         'attribute_quantifier':['not at all','slightly','somewhat','quite','very','extremely'],
+        'attribute_quantifier_more_less':['more','less','#attribute_quantifier#'],
         'maybe_x':['#x#',''],
         'ab':['#a#','#b#'],
+        'set_pronouns_you':'[they:you][them:you][their:your][theirs:yours][themself:yourself]',
+        'set_pronouns_they':'[they:they][them:them][their:their][theirs:theirs][themself:themself]',
+        'today_advice_head':['It is a good day to',
+                             'Today is as good a day as any to'],
+        'today_advice':['#today_advice_head# #verb_phrase#, #conditional_if#.',
+                        '#today_advice_head# #verb_phrase#.'],
+        'verb_phrase':[
+            'take new opportunities',
+            'fall in love', 'relish life',
+            'start something new', 'break with the old',
+            'count #their# blessings',
+            'become #[x:#attribute_quantifier_more_less# ]maybe_x##attribute_adjective#'],
+        'conditional_if':['if #they# are #[x:#attribute_quantifier# ]maybe_x##attribute_adjective#',
+                          'if #they# #verb_phrase#'],
+        'conditional_when':['when #they# #verb_phrase#']
     })
 fg.add_modifiers(modifiers.base_english)
+
+
+# In[63]:
+
+fg.flatten('#[#set_pronouns_you#]today_advice#')
 
 
 # In[7]:
 
 def tell_fortune(answers):
     random.seed(answers)
-    return fg.flatten('#attribute_statement#')
+    fortune = []
+    fortune.append(fg.flatten('#attribute_statement#'))
+    fortune.append(fg.flatten('#attribute_statement#'))
+    return ' '.join(fortune)
 
 
 # In[8]:
