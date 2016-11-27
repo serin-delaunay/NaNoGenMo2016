@@ -59,7 +59,7 @@ def generate_entry(questionnaire):
 **email**: `{3}`  
 **password**: `{4}`  
 """.format(uuid.uuid4(), username, name, email, password)
-    data = data + '\n'.join("**{0}**  \n    {1}".format(q[0],a)
+    data = data + '\n'.join("**{0}** {1}  ".format(q[0],a)
                             for (q,a) in zip(questionnaire, answers))+'  \n'
     answer_seed(answers, reset=True)
     data = data + "**Fortune**:  \n{0}\n\n".format(tell_fortune(answers))
