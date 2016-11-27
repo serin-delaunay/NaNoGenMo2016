@@ -377,7 +377,7 @@ fg = Grammar({
             'take #[a:new][b:more]ab# opportunities',
             'fall in love#[x: #again#]maybe_x#', 'relish life#[x: #again#]maybe_x#',
             'start something new', 'break with the old#[x: #again#]maybe_x#',
-            'count #their# blessings'],
+            'count #their# blessings', 'make a#[x: new]maybe_x# friend'],
         'verb_phrase':[
             '#platitude_verb_phrase#',
             'become #[x:#attribute_quantifier_more_less# ]maybe_x##attribute_adjective#'],
@@ -390,12 +390,21 @@ fg = Grammar({
         'omen':['#omen_noun##[x: on #day_descriptor.a#]maybe_x#',],
                 #'#omen_noun# #omen_verbing##[x: on #day_descriptor.a#]maybe_x#'],
         #'omen_verbing':['']
-        'omen_noun':['the #omen_noun_aux#',
-                     '#omen_noun_aux.a#'],
-        'omen_noun_aux':['#[x:dusk-]maybe_x#black cat',
+        'omen_noun':['the #omen_animal##[x: #omen_animal_verb#]maybe_x#',
+                     '#omen_animal.a##[x: #omen_animal_verb#]maybe_x#',
+                     '#omen_abstract#',
+                     '#omen_sky.a#'],
+        'omen_abstract':['danger','love in the air',
+                         'new opportunities','#their# dreams #[a:coming true][b:slipping away]ab#',
+                         ],
+        'omen_animal':['#omen_animal_aux#','#omen_animal_aux#','#omen_animal_aux#',
+                       '#month# #omen_animal_aux#','#omen_animal_aux# of #attribute_adjective#ness'],
+        'omen_animal_aux':['#[x:dusk-]maybe_x#black cat',
                          '#[x:giant ]maybe_x#moth',
                          '#[x:vampire ]maybe_x#bat',
-                         'unicorn','panther','rainbow','eclipse','new star','comet','shooting star'],
+                         'unicorn','panther','ghost'],
+        'omen_animal_verb':['prowling','revealing itself','in your life','escaping','dozing'],
+        'omen_sky':['rainbow','eclipse','new star','comet','shooting star'],
         'day_descriptor':['#[x:#weather# ]maybe_x##[x:#month# ]maybe_x##day#',
                           '#[x:#weather# ]maybe_x##day##[x: of #month#]maybe_x#'],
         'month':['January','February','March','April',
@@ -411,7 +420,9 @@ fg = Grammar({
                  'May','June','July','August',
                  'September','October','November','December',
                  'Sektober'],
-        'day':['day','#day_of_week#'],
+        'time_of_day':['day','morning','afternoon',
+                       'evening','evening','night','night'],
+        'day':['#time_of_day#','#day_of_week#'],
         'day_of_week':['Monday','Tuesday','Wednesday','Thursday',
                        'Friday','Saturday','Sunday',
                        'Monday','Tuesday','Wednesday','Thursday',
@@ -435,7 +446,7 @@ fg.add_modifiers(modifiers.base_english)
 
 # In[7]:
 
-fg.flatten('#[#set_pronouns_you#]conditional_advice#')
+fg.flatten('#[#set_pronouns_you#]omen#')
 
 
 # In[8]:
@@ -449,7 +460,7 @@ def tell_fortune(answers):
     return ' '.join(fortune)
 
 
-# In[10]:
+# In[9]:
 
 entries = []
 wordcount = 0
