@@ -53,7 +53,7 @@ def generate_entry(questionnaire):
     }
     password = password.translate(password_rules)
     answers = tuple(q[1]() for q in questionnaire)
-    data = """**userid**: `{0}`
+    data = """**userid**: `{0}`  
 **username**: `{1}`  
 **name**: {2}  
 **email**: `{3}`  
