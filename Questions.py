@@ -364,7 +364,7 @@ questions = [
              ()),
     Question('prime',
              lambda:'What is your favourite prime number?',
-             lambda:str(random.choice(pycorpora.mathematics.primes['primes'][:random.randint(0,999)])),
+             lambda:str(random.choice(pycorpora.mathematics.primes['primes'][:random.randint(1,999)])),
              ('maths','geek')),
     Question('author',
              lambda:'Who is your favourite author?',
