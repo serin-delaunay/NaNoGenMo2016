@@ -57,7 +57,10 @@ g = Grammar({
         'person':['fan#person_aux#','cat#person_aux#','cow#person_aux#'],
         #'person_rev':['#person#','#person#','#person.reverse#'],
         'domain':['#letter##mail#.#tld#',
-                  '#mail_adj##mail#.#tld#'],
+                  '#mail_adj##mail#.#tld#',
+                  '#letter##mail#.#tld#',
+                  '#mail_adj##mail#.#tld#',
+                  '#mail##mail_adj#.#tld#'],
         'tld':['com','org','net',
                'com','org','net',
                '#country_tld#',
@@ -338,7 +341,7 @@ password: "{4}".
     return data
 
 
-# In[54]:
+# In[6]:
 
 fg = Grammar({
         'attribute_verb':['are','have always been','were once',
@@ -365,35 +368,88 @@ fg = Grammar({
                              'Today is as good a day as any to'],
         'today_advice':['#today_advice_head# #verb_phrase#, #conditional_if#.',
                         '#today_advice_head# #verb_phrase#.'],
+        'anytime_advice':[
+            '#they# #[a:should][b:may wish to]ab##[x: take the time to]maybe_x# #verb_phrase#'],
+        'again':['again','once more',
+                 'again','once more',
+                 'for the umpteenth time'],
+        'platitude_verb_phrase':[
+            'take #[a:new][b:more]ab# opportunities',
+            'fall in love#[x: #again#]maybe_x#', 'relish life#[x: #again#]maybe_x#',
+            'start something new', 'break with the old#[x: #again#]maybe_x#',
+            'count #their# blessings'],
         'verb_phrase':[
-            'take new opportunities',
-            'fall in love', 'relish life',
-            'start something new', 'break with the old',
-            'count #their# blessings',
+            '#platitude_verb_phrase#',
             'become #[x:#attribute_quantifier_more_less# ]maybe_x##attribute_adjective#'],
         'conditional_if':['if #they# are #[x:#attribute_quantifier# ]maybe_x##attribute_adjective#',
                           'if #they# #verb_phrase#'],
-        'conditional_when':['when #they# #verb_phrase#']
+        'conditional_when':['when #they# #verb_phrase#',
+                            'when #they# #conditional_verb_phrase#'],
+        'sense_verb':['see','hear','smell','touch','taste','sense','become aware of'],
+        'conditional_verb_phrase':['#sense_verb# #omen#'],
+        'omen':['#omen_noun##[x: on #day_descriptor.a#]maybe_x#',],
+                #'#omen_noun# #omen_verbing##[x: on #day_descriptor.a#]maybe_x#'],
+        #'omen_verbing':['']
+        'omen_noun':['the #omen_noun_aux#',
+                     '#omen_noun_aux.a#'],
+        'omen_noun_aux':['#[x:dusk-]maybe_x#black cat',
+                         '#[x:giant ]maybe_x#moth',
+                         '#[x:vampire ]maybe_x#bat',
+                         'unicorn','panther','rainbow','eclipse','new star','comet','shooting star'],
+        'day_descriptor':['#[x:#weather# ]maybe_x##[x:#month# ]maybe_x##day#',
+                          '#[x:#weather# ]maybe_x##day##[x: of #month#]maybe_x#'],
+        'month':['January','February','March','April',
+                 'May','June','July','August',
+                 'September','October','November','December',
+                 'January','February','March','April',
+                 'May','June','July','August',
+                 'September','October','November','December',
+                 'January','February','March','April',
+                 'May','June','July','August',
+                 'September','October','November','December',
+                 'January','February','March','April',
+                 'May','June','July','August',
+                 'September','October','November','December',
+                 'Sektober'],
+        'day':['day','#day_of_week#'],
+        'day_of_week':['Monday','Tuesday','Wednesday','Thursday',
+                       'Friday','Saturday','Sunday',
+                       'Monday','Tuesday','Wednesday','Thursday',
+                       'Friday','Saturday','Sunday',
+                       'Monday','Tuesday','Wednesday','Thursday',
+                       'Friday','Saturday','Sunday',
+                       'Grunday'],
+        'weather':['stormy','stormy','stormy',
+                   'cold','cold','chilly','frosty',
+                   'warm','pleasant','temperate',
+                   'rainy','wet','snowy','unpleasant',
+                   'turbulent','busy','disastrous',
+                   'ominous'],
+        'conditional_advice':['#conditional_if.capitalize#, #anytime_advice#.',
+                              '#conditional_when.capitalize#, #anytime_advice#.',
+                              '#conditional_when.capitalize#, #conditional_if# then #anytime_advice#.',
+                              '#conditional_when.capitalize#, #anytime_advice#, #conditional_if#.']
     })
 fg.add_modifiers(modifiers.base_english)
 
 
-# In[63]:
-
-fg.flatten('#[#set_pronouns_you#]today_advice#')
-
-
 # In[7]:
+
+fg.flatten('#[#set_pronouns_you#]conditional_advice#')
+
+
+# In[8]:
 
 def tell_fortune(answers):
     random.seed(answers)
     fortune = []
     fortune.append(fg.flatten('#attribute_statement#'))
-    fortune.append(fg.flatten('#attribute_statement#'))
+    fortune.append(fg.flatten('#[#set_pronouns_you#]today_advice#'))
+    fortune.append(fg.flatten('#[#set_pronouns_you#]conditional_advice#'))
     return ' '.join(fortune)
 
 
-# In[8]:
+# In[10]:
 
 entries = []
 wordcount = 0
@@ -405,6 +461,7 @@ questionnaire = sorted(question_set(questions,
 while add_entry(generate_entry(questionnaire),50000):
     pass
 print(wordcount)
+print(len(entries))
 story = '\n'.join(entries)
 f = open('data_leak.txt','w',encoding='utf-8')
 f.write(story)
