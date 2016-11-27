@@ -169,6 +169,7 @@ def add_religion(grammar, name, data):
 rg = Grammar({})
 add_religion(rg, 'all',
              {'Atheism':{},
+              'Agnosticism':{},
               'Theism':{'all_other':pycorpora.religion.religions,
                         'Christianity':{},
                         'Islam':{},
