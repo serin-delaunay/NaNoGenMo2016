@@ -341,7 +341,7 @@ password: "{4}".
     return data
 
 
-# In[6]:
+# In[24]:
 
 fg = Grammar({
         'attribute_verb':['are','have always been','were once',
@@ -439,14 +439,29 @@ fg = Grammar({
         'conditional_advice':['#conditional_if.capitalize#, #anytime_advice#.',
                               '#conditional_when.capitalize#, #anytime_advice#.',
                               '#conditional_when.capitalize#, #conditional_if# then #anytime_advice#.',
-                              '#conditional_when.capitalize#, #anytime_advice#, #conditional_if#.']
+                              '#conditional_when.capitalize#, #anytime_advice#, #conditional_if#.'],
+        'prediction_aux_verb':['will','might','may'],
+        'prediction_adverb_1':['possibly','probably','likely','most likely',],
+        'prediction_adverb_2':['never','not',
+                               'one day','finally','in time',],
+        'prediction_core':'#they# #prediction_aux_verb##[x: #prediction_adverb_1#]maybe_x##[x: #prediction_adverb_2#]maybe_x# #prediction_verb_phrase#',
+        'prediction':['#prediction_core.capitalize#.',
+                      '#prediction_core.capitalize#.',
+                      '#prediction_core.capitalize#.',
+                      '#conditional_if.capitalize#, #prediction_core#.',
+                      '#prediction_core.capitalize#, #conditional_if#.',
+                      '#conditional_when.capitalize#, #prediction_core#.'],
+        'realise_dreams_verb':['realise','achieve','reach'],
+        'prediction_verb_phrase':['find true love',
+                                  '#realise_dreams_verb# #their# dreams',
+                                  'have children']
     })
 fg.add_modifiers(modifiers.base_english)
 
 
-# In[7]:
+# In[25]:
 
-fg.flatten('#[#set_pronouns_you#]omen#')
+fg.flatten('#[#set_pronouns_you#]prediction#')
 
 
 # In[8]:
@@ -457,6 +472,7 @@ def tell_fortune(answers):
     fortune.append(fg.flatten('#attribute_statement#'))
     fortune.append(fg.flatten('#[#set_pronouns_you#]today_advice#'))
     fortune.append(fg.flatten('#[#set_pronouns_you#]conditional_advice#'))
+    fortune.append(fg.flatten('#[#set_pronouns_you#]pr#'))
     return ' '.join(fortune)
 
 
