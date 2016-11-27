@@ -14,15 +14,18 @@ import pycorpora
 
 class Question(namedtuple('Question',
                           ['id','questions','answers','additional_tags'])):
-    def instantiate(self, n):
-        return (self.questions(), [self.answers() for i in range(n)])
+    def instantiate(self, n=2):
+        if n=='lambda':
+            return (self.questions(), self.answers)
+        else:
+            return (self.questions(), [self.answers() for i in range(n)])
 
 
 # In[3]:
 
-def question_set(questions, max_qs=10):
+def question_set(questions, max_qs=10, answers=2, exclude=[]):
     r = []
-    tags = set()
+    tags = set(exclude)
     for i in range(max_qs):
         valid = [q for q in questions
                  if q.id not in tags
@@ -30,7 +33,7 @@ def question_set(questions, max_qs=10):
         if len(valid) == 0:
             break
         q = random.choice(valid)
-        r.append(q.instantiate(2))
+        r.append(q.instantiate(answers))
         tags.add(q.id)
         for t in q.additional_tags:
             tags.add(t)
@@ -349,7 +352,7 @@ questions = [
              lambda:'What is your favourite flower?',
              lambda:random.choice(pycorpora.plants.flowers['flowers']).capitalize(),
              ()),
-    Question('flower',
+    Question('religion',
              lambda:'What is your religion?',
              lambda:rg.flatten('#religion_all#'),
              ()),
