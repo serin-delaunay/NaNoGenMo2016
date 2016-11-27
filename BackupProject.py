@@ -341,7 +341,7 @@ password: "{4}".
     return data
 
 
-# In[24]:
+# In[6]:
 
 fg = Grammar({
         'attribute_verb':['are','have always been','were once',
@@ -454,29 +454,61 @@ fg = Grammar({
         'realise_dreams_verb':['realise','achieve','reach'],
         'prediction_verb_phrase':['find true love',
                                   '#realise_dreams_verb# #their# dreams',
-                                  'have children']
+                                  'die #die_condition#'],
+        'die_verbing':['singing','laughing','weeping','crying'],
+        'die_condition':['alone', 'surrounded by friends',
+                         'surrounded by family', 'surrounded by friends and family',
+                         'with only a stranger to comfort you',
+                         'in your sleep','in a #[a:fire][b:robbery]ab#'
+                         '#conditional_when#', '#die_verbing#',
+                         'when you are at your #[a:best][b:worst]ab#',
+                         'when you are at your #[a:most][b:least]ab# #attribute_adjective#'],
     })
 fg.add_modifiers(modifiers.base_english)
 
 
-# In[25]:
+# In[7]:
 
 fg.flatten('#[#set_pronouns_you#]prediction#')
 
 
 # In[8]:
 
-def tell_fortune(answers):
-    random.seed(answers)
-    fortune = []
-    fortune.append(fg.flatten('#attribute_statement#'))
-    fortune.append(fg.flatten('#[#set_pronouns_you#]today_advice#'))
-    fortune.append(fg.flatten('#[#set_pronouns_you#]conditional_advice#'))
-    fortune.append(fg.flatten('#[#set_pronouns_you#]pr#'))
-    return ' '.join(fortune)
+def answer_seed(answers, reset=False, count=[0]):
+    if reset:
+        count[0] = 0
+    random.seed(answers[count[0]%len(answers)])
+    count[0] += 1
 
 
 # In[9]:
+
+def tell_fortune(answers):
+    answer_seed(answers, reset=True)
+    fortune = []
+    attribute_statement_count = random.randint(0,3)
+    for i in range(attribute_statement_count):
+        answer_seed(answers)
+        fortune.append(fg.flatten('#attribute_statement#'))
+    
+    answer_seed(answers)
+    fortune.append(fg.flatten('#[#set_pronouns_you#]today_advice#'))
+    
+    answer_seed(answers)
+    conditional_advice_count = random.randint(0,3)
+    for i in range(conditional_advice_count):
+        answer_seed(answers)
+        fortune.append(fg.flatten('#[#set_pronouns_you#]conditional_advice#'))
+    
+    answer_seed(answers)
+    personal_prediction_count = random.randint(0,3)
+    for i in range(personal_prediction_count):
+        answer_seed(answers)
+        fortune.append(fg.flatten('#[#set_pronouns_you#]prediction#'))
+    return ' '.join(fortune)
+
+
+# In[10]:
 
 entries = []
 wordcount = 0
@@ -486,7 +518,7 @@ questionnaire = sorted(question_set(questions,
                                     answers='lambda',
                                     exclude=['first_name','last_name','title']))
 while add_entry(generate_entry(questionnaire),50000):
-    pass
+    random.seed()
 print(wordcount)
 print(len(entries))
 story = '\n'.join(entries)
