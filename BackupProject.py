@@ -32,7 +32,7 @@ def add_entry(entry, length_target=50000):
     return True
 
 
-# In[ ]:
+# In[4]:
 
 def generate_entry(questionnaire):
     name = qg.flatten('#title_full_name#')
@@ -54,19 +54,19 @@ def generate_entry(questionnaire):
     password = password.translate(password_rules)
     answers = tuple(q[1]() for q in questionnaire)
     data = """**userid**: `{0}`
-**username**: `{1}`
-**name**: {2}.
-**email**: `{3}`
-**password**: `{4}`
+**username**: `{1}`  
+**name**: {2}  
+**email**: `{3}`  
+**password**: `{4}`  
 """.format(uuid.uuid4(), username, name, email, password)
-    data = data + '\n'.join("**{0}**\n    {1}".format(q[0],a)
-                            for (q,a) in zip(questionnaire, answers))+'\n'
+    data = data + '\n'.join("**{0}**  \n    {1}".format(q[0],a)
+                            for (q,a) in zip(questionnaire, answers))+'  \n'
     answer_seed(answers, reset=True)
-    data = data + "**Fortune**:\n{0}\n".format(tell_fortune(answers))
+    data = data + "**Fortune**:  \n{0}\n\n".format(tell_fortune(answers))
     return data
 
 
-# In[ ]:
+# In[5]:
 
 g = Grammar({
         'address':'#nickname#@#domain#',
@@ -302,7 +302,7 @@ g = Grammar({
 g.add_modifiers({'reverse':lambda text, *params: text[::-1]})
 
 
-# In[ ]:
+# In[6]:
 
 possible_translations = {
     "A":["@","4","^","/\\","/-\\","aye"],
@@ -353,7 +353,7 @@ obvious_translations = {
 }
 
 
-# In[ ]:
+# In[7]:
 
 fg = Grammar({
         'attribute_verb':['are','have always been','were once',
@@ -545,7 +545,7 @@ fg = Grammar({
 fg.add_modifiers(modifiers.base_english)
 
 
-# In[ ]:
+# In[8]:
 
 def answer_seed(answers, reset=False, count=[0]):
     if reset:
@@ -554,7 +554,7 @@ def answer_seed(answers, reset=False, count=[0]):
     count[0] += 1
 
 
-# In[ ]:
+# In[9]:
 
 def tell_fortune(answers, pronouns='set_pronouns_you',future_only=False,
                  identifier_subject='you', identifier_possessive='your',
@@ -630,11 +630,11 @@ def tell_fortune(answers, pronouns='set_pronouns_you',future_only=False,
                     identifier_possessive,
                     p.number_to_words(str(child_number+1)+'th')),
                 max_child_fortunes=max(0,max_child_fortunes-1)))
-    fortune_text = '\n'.join(fortunes)
+    fortune_text = '\n\n'.join(fortunes)
     return fortune_text
 
 
-# In[ ]:
+# In[10]:
 
 entries = []
 wordcount = 0
