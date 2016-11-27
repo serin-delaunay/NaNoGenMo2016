@@ -9,6 +9,7 @@ import tracery_alterations
 from Questions import question_set, questions, qg
 import pycorpora
 import uuid
+import re
 
 
 # In[2]:
@@ -315,7 +316,7 @@ obvious_translations = {
 
 def generate_entry(questionnaire):
     name = qg.flatten('#title_full_name#')
-    splitname = name.lower().split(' -')[1:-1]
+    splitname = re.split('[ -]',name.lower())
     initials = ''.join(w[0] for w in splitname)
     id_words = [initials]+splitname
     g.push_rules('id_word',id_words)
@@ -452,14 +453,37 @@ fg = Grammar({
                       '#prediction_core.capitalize#, #conditional_if#.',
                       '#conditional_when.capitalize#, #prediction_core#.'],
         'realise_dreams_verb':['realise','achieve','reach'],
+        'artist':['Picasso','van Gogh','Monet','Mondrian','Rembrandt',
+                  'Caravaggio','Klimt','Michelangelo','Vermeer','Raphael',
+                  'Cézanne', 'Renoir'],
+        'composition_type':['sonata','symphony','concerto','opera'],
+        'baroque_composition_type':['sonata','suite','concerto'],
+        'composer':['Beethoven','Mozart','Tchaikovsky','Mussorgsky',
+                    'Mahler','Schubert','Schumann',
+                    'Backer-Grøndahl'],
+        'baroque_composer':['Bach','Handel','Vivaldi','Royer'],
+        'composition':['#composer# #composition_type',
+                       '#composer# #composition_type',
+                       '#baroque_composer# #baroque_composition_type#',
+                       '#composer# #composition_type',
+                       '#composer# #composition_type',
+                       '#baroque_composer# #baroque_composition_type#',
+                       '#[a:#baroque_composition_type][b:composition_type]ab#'],
+        'discovery':['new planet','new element',
+                     '#[a:lost][b:missing]ab# #artist#',
+                     '#[a:lost][b:missing]ab# #composition#'],
+        'invention':['time travel','faster-than-light travel', 'teleportation',
+                     'faster-than-light communication'],
         'prediction_verb_phrase':['find true love',
                                   '#realise_dreams_verb# #their# dreams',
+                                  'discover #discovery.a#',
+                                  'invent #invention#',
                                   'die #die_condition#'],
         'die_verbing':['singing','laughing','weeping','crying'],
         'die_condition':['alone', 'surrounded by friends',
                          'surrounded by family', 'surrounded by friends and family',
                          'with only a stranger to comfort you',
-                         'in your sleep','in a #[a:fire][b:robbery]ab#'
+                         'in your sleep','in a #[a:fire][b:robbery]ab#',
                          '#conditional_when#', '#die_verbing#',
                          'when you are at your #[a:best][b:worst]ab#',
                          'when you are at your #[a:most][b:least]ab# #attribute_adjective#'],
