@@ -11,5 +11,11 @@ I'm using [PyDDL](https://github.com/garydoranjr/pyddl) with a few wrapper class
 * Probably TeX to generate the end result.
 
 There's also a backup project: leaked user data from my defunct website, *The Greatest Personality Test And Fortune Telling Website In The World... Ever!*
-The text can be found [here](https://github.com/serin-delaunay/NaNoGenMo2016/blob/master/data_leak.md).
+The text can be found [here](https://github.com/serin-delaunay/NaNoGenMo2016/blob/master/output/data_leak.md).
 It's [#125](https://github.com/NaNoGenMo/2016/issues/125) on the main repo.
+
+All output text [output/](https://github.com/serin-delaunay/NaNoGenMo2016/blob/master/output) is provided under the CC0 license.
+
+<a href="http://creativecommons.org/publicdomain/zero/1.0/"><img src="http://i.creativecommons.org/p/zero/1.0/88x31.png"></a>
+
+To the extent possible under law, [Serin Delaunay](https://github.com/serin-delaunay/NaNoGenMo2016) has waived all copyright and related or neighboring rights to NaNoGenMo 2016 entry text. This work is published from: United Kingdom.
