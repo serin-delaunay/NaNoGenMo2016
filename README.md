@@ -11,7 +11,7 @@ I'm using [PyDDL](https://github.com/garydoranjr/pyddl) with a few wrapper class
 * Probably TeX to generate the end result.
 
 There's also a backup project: leaked user data from my defunct website, *The Greatest Personality Test And Fortune Telling Website In The World... Ever!*
-The text can be found [here](https://github.com/serin-delaunay/NaNoGenMo2016/blob/master/output/data_leak_v1.md).
+The text can be found [here](https://github.com/serin-delaunay/NaNoGenMo2016/blob/master/output/data_leak_v2.md).
 It's [#125](https://github.com/NaNoGenMo/2016/issues/125) on the main repo.
 
 All output text ([output/](https://github.com/serin-delaunay/NaNoGenMo2016/blob/master/output)) is provided under the CC0 license.
