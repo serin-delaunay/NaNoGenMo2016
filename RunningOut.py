@@ -12,10 +12,12 @@ from os import path
 
 # In[2]:
 
-def tokenise_text(text):
+def tokenise_text(text, start_tokens):
     pattern = '[\w]+'
     punctuation = re.split(pattern, text)
     words = re.findall(pattern, text)
+    for w in words:
+        start_tokens.add(w)
     if len(words) == 0:
         tokens = punctuation
     else:
@@ -26,8 +28,8 @@ def tokenise_text(text):
 
 # In[3]:
 
-def process_text(text, model, ngram_lengths=list(range(2,6))):
-    tokens = tokenise_text(text.lower())
+def process_text(text, model, start_tokens, ngram_lengths=list(range(2,6))):
+    tokens = tokenise_text(text.lower(), start_tokens)
     for ngram_length in ngram_lengths:
         for i in range(len(tokens)-ngram_length+1):
             ngram = tokens[i:i+ngram_length]
@@ -78,14 +80,14 @@ def enable_all(model):
 
 # In[7]:
 
-def output_text(model, stop_length=50000, ngram_lengths=list(range(2,6))):
+def output_text(model, start_tokens, stop_length=50000, ngram_lengths=list(range(2,6))):
     tokens = []
     length = 0
-    possibilities = list(itertools.chain.from_iterable(model.values()))
-    print('output_text(): found {0} possible starting tokens'.format(len(possibilities)))
-    if(len(possibilities)) == 0:
+    if len(model) == 0 or len(start_tokens) == 0:
         return '',stop_length+1
-    tokens.append(random.choice(possibilities))
+    i = random.randint(0,len(start_tokens)-1)
+    tokens.append(start_tokens[i])
+    del start_tokens[i]
     if(tokens[-1].isalnum()):
         length += 1
     while length <= stop_length:
@@ -120,31 +122,34 @@ def output_text(model, stop_length=50000, ngram_lengths=list(range(2,6))):
     return capitalise(''.join(tokens)), length
 
 
-# In[ ]:
+# In[8]:
 
 model = {}
+start_tokens = set()
 corpora_dir = 'sources'
 for fn in [path.join(corpora_dir,fn) for fn in os.listdir(corpora_dir)]:
     print('Processing {0}...'.format(fn))
     with open(fn,'r',encoding='utf-8') as f:
         try:
-            process_text(f.read(),model)
+            process_text(f.read(),model, start_tokens)
         except UnicodeDecodeError:
             print(fn)
             raise
+start_tokens = list(start_tokens)
 
 
-# In[ ]:
+# In[9]:
 
 print('Generating and outputting story...')
 chapters = []
 total_length = 0
+target_length = 55000
 cnum = 0
-with open('output/markov.txt','w',encoding='utf-8') as f:
-    while total_length <= 50000:
+with open('output/markov_v2.txt','w',encoding='utf-8') as f:
+    while total_length <= target_length:
         cnum += 1
-        print('Generating chapter ({0} words to go)...'.format(50000-total_length))
-        chapter, length = output_text(model,50000-total_length)
+        print('Generating chapter ({0} words to go)...'.format(target_length-total_length))
+        chapter, length = output_text(model,start_tokens,target_length-total_length)
         chapters.append(chapter)
         total_length += length
         f.write('\n\n   ---   Chapter {0}   ---   \n\n'.format(cnum))
