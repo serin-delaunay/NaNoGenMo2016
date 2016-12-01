@@ -76,7 +76,7 @@ def enable_all(model):
             rule.update([enabled_production(dp) for dp in disabled_productions])
 
 
-# In[ ]:
+# In[7]:
 
 def output_text(model, stop_length=50000, ngram_lengths=list(range(2,6))):
     tokens = []
